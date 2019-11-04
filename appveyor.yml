@@ -11,23 +11,18 @@ environment:
     - CONFIGURATION: Debug
       CONSOLE_FRAMEWORK: net45
       LIB_FRAMEWORK: net45
-      TEST_FRAMEWORK: net452
     - CONFIGURATION: Release
       CONSOLE_FRAMEWORK: net45
-      TEST_FRAMEWORK: net452
       LIB_FRAMEWORK: net45
     - CONFIGURATION: Debug
       CONSOLE_FRAMEWORK: netcoreapp2.0
       LIB_FRAMEWORK: netstandard2.0
-      TEST_FRAMEWORK: netcoreapp2.0
     - CONFIGURATION: Release
       CONSOLE_FRAMEWORK: netcoreapp1.0
       LIB_FRAMEWORK: netstandard1.4
-      TEST_FRAMEWORK: netcoreapp1.0
     - CONFIGURATION: Release
       CONSOLE_FRAMEWORK: netcoreapp2.0
       LIB_FRAMEWORK: netstandard2.0
-      TEST_FRAMEWORK: netcoreapp2.0
 
 before_build:
   - git submodule update --init --recursive
@@ -49,14 +44,15 @@ build_script:
       # Build Projects
       dotnet build -c $env:CONFIGURATION -f $env:LIB_FRAMEWORK .\MaxMind.Db
       dotnet build -c $env:CONFIGURATION -f $env:CONSOLE_FRAMEWORK .\MaxMind.Db.Benchmark
-      dotnet build -c $env:CONFIGURATION -f $env:TEST_FRAMEWORK .\MaxMind.Db.Test
+      dotnet build -c $env:CONFIGURATION -f $env:CONSOLE_FRAMEWORK .\MaxMind.Db.Test
 
 test_script:
   # Run Benchmark
   - dotnet run -f %CONSOLE_FRAMEWORK% -c %CONFIGURATION% -p MaxMind.Db.Benchmark/MaxMind.Db.Benchmark.csproj
 
   # Run Unit Tests
-  - dotnet test -f %TEST_FRAMEWORK% -c %CONFIGURATION% MaxMind.Db.Test/MaxMind.Db.Test.csproj
+  - if "%CONSOLE_FRAMEWORK%" NEQ "netcoreapp1.0" ( ^\
+      dotnet test -f %CONSOLE_FRAMEWORK% -c %CONFIGURATION% MaxMind.Db.Test/MaxMind.Db.Test.csproj )
 
 after_test:
   # Run Unit Tests

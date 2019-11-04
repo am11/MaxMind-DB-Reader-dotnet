@@ -23,8 +23,9 @@ if [ -n "$DOTNETCORE" ]; then
   dotnet run -f $CONSOLE_FRAMEWORK -c $CONFIGURATION -p ./MaxMind.Db.Benchmark/MaxMind.Db.Benchmark.csproj
 
   # Running Unit Tests
-  dotnet test -f $CONSOLE_FRAMEWORK -c $CONFIGURATION ./MaxMind.Db.Test/MaxMind.Db.Test.csproj
-
+  if [ "$CONSOLE_FRAMEWORK" != "netcoreapp1.0" ]; then
+    dotnet test -f $CONSOLE_FRAMEWORK -c $CONFIGURATION ./MaxMind.Db.Test/MaxMind.Db.Test.csproj
+  fi
 else
 
   echo Using Mono
@@ -33,7 +34,8 @@ else
 
   msbuild /t:build /p:Configuration=$CONFIGURATION /p:TargetFramework=net452 ./MaxMind.Db.Test/MaxMind.Db.Test.csproj
 
-  nuget install xunit.runner.console -ExcludeVersion -Version 2.2.0 -OutputDirectory .
-  mono ./xunit.runner.console/tools/xunit.console.exe ./MaxMind.Db.Test/bin/$CONFIGURATION/net452/MaxMind.Db.Test.dll -notrait "Category=BreaksMono"
-
+  if [ "$CONSOLE_FRAMEWORK" != "netcoreapp1.0" ]; then
+    nuget install xunit.runner.console -ExcludeVersion -Version 2.2.0 -OutputDirectory .
+    mono ./xunit.runner.console/tools/xunit.console.exe ./MaxMind.Db.Test/bin/$CONFIGURATION/net452/MaxMind.Db.Test.dll -notrait "Category=BreaksMono"
+  fi
 fi
